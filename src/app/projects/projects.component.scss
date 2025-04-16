@@ -1,0 +1,25 @@
+.projects-container {
+    margin: 4rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    min-height: 600px;
+
+  
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+  
+    .project-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+  
+    .project-desc {
+      color: #666;
+      font-size: 0.95rem;
+    }
+  }
+  

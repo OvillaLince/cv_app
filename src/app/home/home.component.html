@@ -1,0 +1,40 @@
+<!-- app.component.html -->
+<div class="profile-wrapper">
+
+    <div class="profile-content mdl-grid">
+  
+      <!-- Image -->
+      <div class="mdl-cell mdl-cell--4-col-desktop mdl-cell--6-col-tablet mdl-cell--4-col-phone profile-image-container">
+        <img src="assets/profile.png" class="profile-image" alt="Octavio Villalaz" />
+      </div>
+  
+      <!-- Info -->
+      <div class="mdl-cell mdl-cell--8-col-desktop mdl-cell--6-col-tablet mdl-cell--4-col-phone profile-info">
+        <h2>Octavio Villalaz</h2>
+        <p>
+          Backend-focused Software Engineer with over 2 years of work experience developing scalable web applications and data systems. 
+          Strong background in .NET development, PostgreSQL database design, and RESTful API architecture. 
+          Passionate about building efficient backend solutions and exploring data engineering pipelines. 
+          Holds a Master’s in Computer Science and a Graduate Certificate in Data Science.
+        </p>
+  
+        <div class="mdl-grid no-padding">
+          <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
+            <button mat-raised-button color="primary" class="button--full-width" [routerLink]="'/home/projects'">
+              <mat-icon>engineering</mat-icon>&nbsp; 
+              View Projects
+            </button>
+          </div>
+          <div class="mdl-cell mdl-cell--6-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
+            <button mat-raised-button color="accent" class="button--full-width" (click)="openContactDialog()">
+              <mat-icon>mail</mat-icon>&nbsp; 
+              Contact Me
+            </button>
+          </div>
+        </div>
+      </div>
+  
+    </div>
+  
+  </div>
+  

@@ -1,0 +1,26 @@
+<div class="mdl-grid">
+  <div class="mdl-cell mdl-cell--12-col mdl-cell--8-col-tablet mdl-cell--4-col-phone projects-container">
+    <h2>My Projects</h2>
+    <mat-tab-group>
+      <mat-tab label="Databases">  
+        <mat-list>
+          <mat-list-item *ngFor="let project of dbProjects">
+            <mat-icon matListIcon>folder</mat-icon>
+            <div matLine class="project-title">{{ project.title }}</div>
+            <div matLine class="project-desc">{{ project.description }}</div>
+          </mat-list-item>
+        </mat-list>
+      </mat-tab>
+      <mat-tab label="DataScience">
+        <mat-list>
+          <mat-list-item *ngFor="let project of dsProjects">
+            <mat-icon matListIcon>folder</mat-icon>
+            <div matLine class="project-title">{{ project.title }}</div>
+            <div matLine class="project-desc">{{ project.description }}</div>
+          </mat-list-item>
+        </mat-list>
+      </mat-tab>
+    </mat-tab-group>
+    
+  </div>
+</div>
