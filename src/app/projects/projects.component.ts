@@ -25,19 +25,19 @@ export class ProjectsComponent implements OnInit {
     {
       title: 'Data Visualization',
       image: null,
-      code_file: 'assets/Project1-DataVisualization.ipynb',
+      code_file: 'Project1-DataVisualization.ipynb',
       loaded_file: null
     },
     {
       title: 'Linear Models Project',
       image: null,
-      code_file: 'assets/Project1-DataMiningLinearM.ipynb',
+      code_file: 'Project1-DataMiningLinearM.ipynb',
       loaded_file: null
     },
     {
       title: 'WebMining',
       image: null,
-      code_file: 'assets/Project2-WebMining.ipynb',
+      code_file: 'Project2-WebMining.ipynb',
       loaded_file: null
     }
   ];
@@ -46,7 +46,7 @@ export class ProjectsComponent implements OnInit {
     {
       title: 'Linear Models Project',
       image: null,
-      code_file: 'assets/Project1-DataMiningLinearM.ipynb',
+      code_file: 'Project1-DataMiningLinearM.ipynb',
       loaded_file: null
     },
    
@@ -65,7 +65,7 @@ export class ProjectsComponent implements OnInit {
   
       // ✅ Use nbviewer for hosted notebooks on GitHub
       if (path.endsWith('.ipynb')) {
-        const full_path = 'https://raw.githubusercontent.com/OvillaLince/cv_app/main/src/' + path;
+        const full_path = 'https://raw.githubusercontent.com/OvillaLince/cv_app/main/src/app/notebooks/' + path;
         console.log(full_path);
         const iframeHTML = `
           <iframe
