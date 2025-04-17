@@ -62,8 +62,27 @@ export class ProjectsComponent implements OnInit {
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
       const path = project.code_file;
-
-      if (path.endsWith('.sql') || path.endsWith('.txt')) {
+  
+      // ✅ Use nbviewer for hosted notebooks on GitHub
+      if (path.endsWith('.ipynb')) {
+        const full_path = 'https://raw.githubusercontent.com/OvillaLince/cv_app/main/src/' + path;
+        console.log(full_path);
+        const iframeHTML = `
+          <iframe
+            src="https://nbviewer.jupyter.org/url/${encodeURIComponent(full_path)}"
+            width="100%"
+            height="800"
+            frameborder="0"
+          ></iframe>
+        `;
+        project.loaded_file = {
+          name: this.getFilename(path),
+          content: this.sanitizer.bypassSecurityTrustHtml(iframeHTML)
+        };
+      }
+  
+      // ✅ Load local SQL or text files
+      else if (path.endsWith('.sql') || path.endsWith('.txt')) {
         this.http.get(path, { responseType: 'text' }).subscribe({
           next: content => {
             project.loaded_file = {
@@ -71,85 +90,18 @@ export class ProjectsComponent implements OnInit {
               content: this.sanitizer.bypassSecurityTrustHtml(`<pre class="plain-code">${this.escapeHtml(content)}</pre>`)
             };
           },
-          error: err => console.error(`Failed to load ${path}:`, err)
+          error: err => console.error(`Error loading ${path}`, err)
         });
       }
-
-      else if (path.endsWith('.ipynb')) {
-        this.http.get<any>(path).subscribe({
-          next: json => {
-            const html = this.extractNotebookHTML(json);
-            project.loaded_file = {
-              name: this.getFilename(path),
-              content: html
-            };
-          },
-          error: err => console.error(`Failed to load notebook ${path}:`, err)
-        });
-      }
+  
     }
   }
+  
 
   extractNotebookHTML(json: any): SafeHtml {
-    const cells = json.cells || [];
-    let html = '';
-  
-    for (const cell of cells) {
-      // ✅ CODE CELLS
-      if (cell.cell_type === 'code') {
-        const codeRaw = cell.source.join('');
-        html += `<div class="code-cell"><pre class="code">${this.escapeHtml(codeRaw)}</pre>`;
-  
-        if (cell.outputs?.length) {
-          html += `<div class="outputs">`;
-  
-          for (const output of cell.outputs) {
-            // ✅ print() / console output
-            if (output.output_type === 'stream' && output.text) {
-              const text = Array.isArray(output.text) ? output.text.join('') : output.text;
-              if (text && text.trim()) {
-                html += `<div class="output-text">${this.escapeHtml(text)}</div>`;
-              }
-            }
-  
-            // ✅ return value from last line
-            if (output.output_type === 'execute_result' && output.data?.['text/plain']) {
-              const plainText = output.data['text/plain'];
-              if (this.looksLikeDataFrame(plainText)) {
-                html += this.renderTextTableAsHtml(plainText);
-              } else {
-                html += `<div class="output-text">${this.escapeHtml(plainText)}</div>`;
-              }
-            }
-  
-            // ✅ images
-            if (output.data?.['image/png']) {
-              html += `<img class="output-image" src="data:image/png;base64,${output.data['image/png']}" />`;
-            }
-  
-            // ✅ errors
-            if (output.output_type === 'error' && output.traceback?.length) {
-              const traceback = output.traceback.join('\n');
-              html += `<div class="output-error">${this.escapeHtml(traceback)}</div>`;
-            }
-          }
-  
-          html += `</div>`; // end .outputs
-        }
-  
-        html += `</div><hr>`; // end .code-cell
-      }
-  
-      // ✅ MARKDOWN CELLS
-      else if (cell.cell_type === 'markdown') {
-        const markdownText = cell.source.join('');
-        html += `<div class="markdown-cell">${this.escapeHtml(markdownText)}</div>`;
-      }
-    }
-  
-    return this.sanitizer.bypassSecurityTrustHtml(html);
+    return this.sanitizer.bypassSecurityTrustHtml(`<pre>${this.escapeHtml(JSON.stringify(json, null, 2))}</pre>`);
   }
-  
+
 
   escapeHtml(text: string): string {
     const map: { [key: string]: string } = {
