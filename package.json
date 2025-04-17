@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "ng build --base-href=https://OvillaLince.github.io/cv_app/ && ngh --dir=dist/my-angular-app"
+
   },
   "private": true,
   "dependencies": {

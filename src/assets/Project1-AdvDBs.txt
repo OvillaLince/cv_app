@@ -1,0 +1,172 @@
+#1)
+//Import JSON File into MongoDB using mongoimport from mongo tools
+//Make sure BOOKSDATA.json is in the bin folder of MongoDB
+//Open command line interface(cmd) on the machine
+//change into the bin directory of mongoDB
+cd C:\Program Files\MongoDB\Server\7.0\bin
+//Run mongoimport command setting Books and the name of the collection and Exam 4 as the name of the database
+mongoimport --db Exam4 --jsonArray --collection Books --file BOOKSDATA.json 
+
+#2)
+//Now using the MongoDB shell connect to the db created to run the scripts
+use Exam4
+//a)
+db.Books.find(
+  {
+    "date": {
+      $regex: "^.*\/2017$"
+    },
+    "price": { "$lt": 20 }
+  },
+  {
+    "_id": 0,
+    "title": 1,
+    "price": 1
+  }
+).sort({ "price": 1 })
+//b)
+db.Books.aggregate([
+{
+	$match: {"publisher.address.country": "Germany"}
+},
+{
+	$unwind: "$authors"
+},
+{
+	$project: { _id: 0, "First Name": "$authors.first", "Last Name": "$authors.last"}
+}
+])
+//c)
+db.Books.aggregate([
+{
+	$match: { 
+		"authors": {	
+			"$not": {
+          			"$all": [{
+              				"$elemMatch": {"age": {"$lt": 35}}
+              			}]
+            		}
+        	}
+      }
+},
+{
+	$project: { _id: 0, "PublisherName": "$publisher.name", "City": "$publisher.address.city"}
+}
+])
+#d)
+db.Books.aggregate([
+  {
+    $match: {
+      $expr: { $gt: [{ $size: "$authors" }, 1] }
+    }
+  },
+  {
+    $unwind: "$authors" 
+  },
+  {
+    $group: {
+      _id: "$_id",
+      authors: { $push: "$authors" } 
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      pairs: {
+        $map: {
+          input: {
+            $range: [0, { $subtract: [{ $size: "$authors" }, 1] }] 
+          },
+          as: "i",
+          in: {
+            $map: {
+              input: {
+                $range: [
+                  { $add: ["$$i", 1] }, 
+                  { $size: "$authors" }
+                ]
+              },
+              as: "j",
+              in: {
+                $cond: [
+                  { $ne: ["$$i", "$$j"] }, 
+                  {
+                    first: { $arrayElemAt: ["$authors", "$$i"] },
+                    second: { $arrayElemAt: ["$authors", "$$j"] }
+                  },
+                  null
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    $project: {
+      "pairs.first.age": 0,
+      "pairs.second.age": 0
+    }
+  }
+])
+
+
+
+#3)
+//Create a DBMS on Neo4j for Windows
+//Install APOC
+//Start the database
+//Make sure the json file is inside the database import folder and you have the apoc.conf that enables it
+//Run the following scripts
+
+//First create the nodes constraints and unique keys
+CREATE CONSTRAINT FOR (b:Book) REQUIRE b.isbn IS UNIQUE;
+CREATE CONSTRAINT FOR (a:Author) REQUIRE (a.first_name, a.last_name) IS UNIQUE;
+CREATE CONSTRAINT FOR (p:Publisher) REQUIRE (p.name,p.country,p.address) IS UNIQUE;
+
+//Then load all the book and author data into nodes and create edges connecting them named AUTHOR_OF
+CALL apoc.load.json("BOOKSDATA.json") YIELD value AS book
+MERGE (b:Book {isbn:book.isbn})
+SET b.title = book.title,
+b.price = book.price,
+b.date = book.date
+WITH b, book.authors as authors
+UNWIND authors AS author
+MERGE (a:Author {first_name: author.first, last_name: author.last, age: author.age})
+MERGE (a)-[:AUTHOR_OF]->(b)
+
+//Finally load the json file and match each isbn with the nodes already created to find them
+//After it is found create the publisher node with the json data and create an edge called PUBLISHER_OF
+//If the publisher already exists it will just create the edge to the book matched
+CALL apoc.load.json("BOOKSDATA.json") YIELD value AS book
+MATCH(b:Book {isbn: book.isbn}) 
+WITH b, book.publisher as publisher
+MERGE (p:Publisher {name: publisher.name, address: publisher.address.number + ',' + publisher.address.street + ',' + publisher.address.city,
+phone: publisher.phone, country: publisher.address.country})
+MERGE (p)-[:PUBLISHER_OF]->(b)
+
+#4)
+#a)
+MATCH (b:Book)
+WITH b, split(b.date,'/')[2] as year
+WHERE year = '2017' AND b.price < 20.00
+RETURN b.title, b.price
+ORDER BY b.price ASC
+#b)
+MATCH (p:Publisher{country: 'Germany'})--(book)
+MATCH (book)<-[:AUTHOR_OF]-(author)
+RETURN author.first_name, author.last_name
+#c)
+MATCH (p:Publisher)-[:PUBLISHER_OF]->(:Book)<-[:AUTHOR_OF]-(a:Author)
+WITH p, COUNT(DISTINCT a) AS totalAuthors, COUNT(CASE WHEN a.age > 35 THEN 1 ELSE NULL END) AS seniorAuthors, split(p.address,',')[2] AS city
+WHERE totalAuthors = seniorAuthors
+RETURN p.name, city
+#d)
+MATCH (:Author)-[:AUTHOR_OF]->(b:Book)<-[:AUTHOR_OF]-(:Author)
+WITH collect(DISTINCT b) AS books
+UNWIND books AS book
+MATCH (book)<-[:AUTHOR_OF]-(a1:Author)
+MATCH (book)<-[:AUTHOR_OF]-(a2:Author)
+WHERE id(a1) < id(a2)
+RETURN DISTINCT a1.first_name + ' ' + a1.last_name AS author1, a2.first_name + ' ' + a2.last_name AS author2

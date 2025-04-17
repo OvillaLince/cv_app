@@ -21,6 +21,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatTabsModule} from '@angular/material/tabs';
+import { HttpClientModule } from '@angular/common/http';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 @NgModule({
   declarations: [
@@ -43,8 +45,9 @@ import {MatTabsModule} from '@angular/material/tabs';
     MatCardModule,
     MatToolbarModule,
     MatDialogModule,
-    MatTabsModule
-    
+    MatTabsModule,
+    HttpClientModule,
+    MatExpansionModule
   ],
   providers: [],
   bootstrap: [AppComponent]
