@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 
 interface CodeFile {
   name: string;
@@ -9,8 +9,9 @@ interface CodeFile {
 
 interface Project {
   title: string;
-  image: string | null;
-  code_file: string;
+  image: string;
+  safe_image_url?: SafeResourceUrl;
+  codeFile: string;
   loaded_file: CodeFile | null;
 }
 
@@ -21,87 +22,68 @@ interface Project {
   styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
-  dbProjects: Project[] = [
-    {
-      title: 'Data Visualization',
-      image: null,
-      code_file: 'Project1-DataVisualization.ipynb',
-      loaded_file: null
-    },
-    {
-      title: 'Linear Models Project',
-      image: null,
-      code_file: 'Project1-DataMiningLinearM.ipynb',
-      loaded_file: null
-    },
-    {
-      title: 'WebMining',
-      image: null,
-      code_file: 'Project2-WebMining.ipynb',
-      loaded_file: null
-    }
-  ];
-
-  dsProjects: Project[] = [
-    {
-      title: 'Linear Models Project',
-      image: null,
-      code_file: 'Project1-DataMiningLinearM.ipynb',
-      loaded_file: null
-    },
-   
-  ];
+  dbProjects: Project[] = [];
+  dsProjects: Project[] = [];
 
   constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
-    this.loadProjectFiles(this.dbProjects);
-    this.loadProjectFiles(this.dsProjects);
+    this.http.get<Project[]>('http://192.168.56.1:5000/api/projects/db').subscribe(data => {
+      this.dbProjects = data;
+      console.log(this.dbProjects)
+      this.loadProjectFiles(this.dbProjects);
+    });
+  
+    this.http.get<Project[]>('http://192.168.56.1:5000/api/projects/ds').subscribe(data => {
+      this.dsProjects = data;
+      console.log(this.dsProjects)
+
+      this.loadProjectFiles(this.dsProjects);
+    });
   }
 
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
-      const path = project.code_file;
-  
-      // ✅ Use nbviewer for hosted notebooks on GitHub
-      if (path.endsWith('.ipynb')) {
-        const full_path = 'https://raw.githubusercontent.com/OvillaLince/cv_app/main/src/app/notebooks/' + path;
-        console.log(full_path);
-        const iframeHTML = `
-          <iframe
-            src="https://nbviewer.jupyter.org/url/${encodeURIComponent(full_path)}"
-            width="100%"
-            height="800"
-            frameborder="0"
-          ></iframe>
+      const path = project.codeFile;
+
+      // ✅ Trust image/pdf path
+      if (project.image != 'NULL') {
+        project.safe_image_url = this.sanitizer.bypassSecurityTrustResourceUrl(project.image);
+      }
+
+      // ✅ Use Binder link for .ipynb files
+      if (path != 'NULL' && path.endsWith('.ipynb')) {
+        const filename = this.getFilename(path);
+        const binderURL = `https://mybinder.org/v2/gh/OvillaLince/cv_app/main?filepath=notebooks/https://raw.githubusercontent.com/OvillaLince/cv_app/main/notebooks/${filename}`;
+
+        const buttonHTML = `
+          <a href="${binderURL}" target="_blank" rel="noopener" class="binder-launch">
+            🚀 Open Notebook in Binder
+          </a>
         `;
+
         project.loaded_file = {
-          name: this.getFilename(path),
-          content: this.sanitizer.bypassSecurityTrustHtml(iframeHTML)
+          name: filename,
+          content: this.sanitizer.bypassSecurityTrustHtml(buttonHTML)
         };
       }
-  
-      // ✅ Load local SQL or text files
-      else if (path.endsWith('.sql') || path.endsWith('.txt')) {
+
+      // ✅ Handle .sql or .txt files
+      else if (path != 'NULL' && path.endsWith('.sql') || path.endsWith('.txt')) {
         this.http.get(path, { responseType: 'text' }).subscribe({
           next: content => {
             project.loaded_file = {
               name: this.getFilename(path),
-              content: this.sanitizer.bypassSecurityTrustHtml(`<pre class="plain-code">${this.escapeHtml(content)}</pre>`)
+              content: this.sanitizer.bypassSecurityTrustHtml(
+                `<pre class="plain-code">${this.escapeHtml(content)}</pre>`
+              )
             };
           },
           error: err => console.error(`Error loading ${path}`, err)
         });
       }
-  
     }
   }
-  
-
-  extractNotebookHTML(json: any): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(`<pre>${this.escapeHtml(JSON.stringify(json, null, 2))}</pre>`);
-  }
-
 
   escapeHtml(text: string): string {
     const map: { [key: string]: string } = {
@@ -113,29 +95,11 @@ export class ProjectsComponent implements OnInit {
     };
     return text.replace(/[&<>"']/g, m => map[m]);
   }
-  
-  looksLikeDataFrame(text: string): boolean {
-    const lines = text.split('\n');
-    return (
-      lines.length > 1 &&
-      lines[0].match(/^\s*\w+/) !== null &&
-      lines[1].match(/^\s*\d+/) !== null
-    );
-  }
-  
-  renderTextTableAsHtml(text: string): string {
-    const rows = text.trim().split('\n');
-    const tableRows = rows.map((line, i) => {
-      const cols = line.trim().split(/\s{2,}|\t/);
-      const tag = i === 0 ? 'th' : 'td';
-      return `<tr>${cols.map(c => `<${tag}>${this.escapeHtml(c)}</${tag}>`).join('')}</tr>`;
-    });
-  
-    return `<div class="output-table"><table>${tableRows.join('')}</table></div>`;
-  }
-  
 
   getFilename(path: string): string {
     return path.split('/').pop() || '';
+  }
+  public isPdf(path: string | null | undefined): boolean {
+    return !!path && path.trim().toLowerCase().endsWith('.pdf');
   }
 }

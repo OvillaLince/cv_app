@@ -1,0 +1,7 @@
+LOAD CSV WITH HEADERS FROM 'file:/Petersen_Graph.csv' AS row
+MERGE(n1:Petersens{id: toInteger(row.source)})
+MERGE(n2:Petersens{id: toInteger(row.target)})
+WITH row
+MATCH (n1:Petersens{id: toInteger(row.source)})
+MATCH (n2:Petersens{id: toInteger(row.target)})
+MERGE(n1)-[:CONNECTED]->(n2)
