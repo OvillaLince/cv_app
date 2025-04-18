@@ -16,6 +16,11 @@ interface Project {
   loaded_file: CodeFile | null;
 }
 
+interface AllProjectsResponse {
+  dbProject: Project[];
+  dsProject: Project[];
+}
+
 @Component({
   selector: 'app-projects',
   standalone: false,
@@ -38,11 +43,11 @@ export class ProjectsComponent implements OnInit {
   }
   loadProjects(): void {
     this.isLoading = true;
-    this.http.get<{ dbProjects: Project[]; dsProjects: Project[] }>('https://cv-app-backend.onrender.com/api/projects/all')
+    this.http.get<AllProjectsResponse>('https://cv-app-backend.onrender.com/api/projects/all')
       .subscribe({
         next: (response) => {
-          this.dbProjects = response.dbProjects;
-          this.dsProjects = response.dsProjects;
+          this.dbProjects = response.dbProject;
+          this.dsProjects = response.dsProject;
   
           this.loadProjectFiles(this.dbProjects);
           this.loadProjectFiles(this.dsProjects);
