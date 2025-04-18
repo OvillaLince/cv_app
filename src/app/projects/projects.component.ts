@@ -102,4 +102,7 @@ export class ProjectsComponent implements OnInit {
   public isPdf(path: string | null | undefined): boolean {
     return !!path && path.trim().toLowerCase().endsWith('.pdf');
   }
+  isMobile(): boolean {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
 }

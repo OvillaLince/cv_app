@@ -1,4 +1,10 @@
 <div class="projects-container">
+
+  <!-- 🔙 Back Button -->
+  <button mat-button class="back-button" routerLink="/home">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+
   <mat-tab-group>
     <mat-tab label="Database Projects">
       <mat-accordion multi="false">
@@ -8,7 +14,9 @@
           </mat-expansion-panel-header>
 
           <div class="project-wrapper">
-            <div class="code-column" *ngIf="project.codeFile != 'NULL'">
+
+            <!-- Code Column -->
+            <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
               <div class="code-wrapper">
                 <div *ngIf="project.loaded_file; else loadingDb">
                   <div [innerHTML]="project.loaded_file.content"></div>
@@ -19,16 +27,25 @@
               </div>
             </div>
 
+            <!-- Image / PDF Column -->
             <div class="image-column" *ngIf="project.safe_image_url">
               <ng-container *ngIf="isPdf(project.image); else imageViewDb">
-                <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
-                  <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
-                </object>
+                <ng-container *ngIf="!isMobile(); else mobilePdfDb">
+                  <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
+                    <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
+                  </object>
+                </ng-container>
+                <ng-template #mobilePdfDb>
+                  <div class="mobile-pdf-message">
+                    <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+                  </div>
+                </ng-template>
               </ng-container>
               <ng-template #imageViewDb>
                 <img [src]="project.safe_image_url" alt="Project image" />
               </ng-template>
             </div>
+
           </div>
         </mat-expansion-panel>
       </mat-accordion>
@@ -42,7 +59,9 @@
           </mat-expansion-panel-header>
 
           <div class="project-wrapper">
-            <div class="code-column" *ngIf="project.codeFile != 'NULL'">
+
+            <!-- Code Column -->
+            <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
               <div class="code-wrapper">
                 <div *ngIf="project.loaded_file; else loadingDs">
                   <div [innerHTML]="project.loaded_file.content"></div>
@@ -53,16 +72,25 @@
               </div>
             </div>
 
+            <!-- Image / PDF Column -->
             <div class="image-column" *ngIf="project.safe_image_url">
               <ng-container *ngIf="isPdf(project.image); else imageViewDs">
-                <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
-                  <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
-                </object>
+                <ng-container *ngIf="!isMobile(); else mobilePdfDs">
+                  <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
+                    <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
+                  </object>
+                </ng-container>
+                <ng-template #mobilePdfDs>
+                  <div class="mobile-pdf-message">
+                    <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+                  </div>
+                </ng-template>
               </ng-container>
               <ng-template #imageViewDs>
                 <img [src]="project.safe_image_url" alt="Project image" />
               </ng-template>
             </div>
+
           </div>
         </mat-expansion-panel>
       </mat-accordion>
