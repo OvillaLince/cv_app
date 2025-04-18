@@ -101,7 +101,7 @@ export class ProjectsComponent implements OnInit {
       console.warn(`🔁 Retrying (${this.retryCount}/${this.MAX_RETRIES}) in ${this.RETRY_DELAY_MS / 1000}s...`);
       setTimeout(() => this.refresh(), this.RETRY_DELAY_MS);
     } else {
-      console.error('❌ Max retries exceeded. No further attempts will be made.');
+      this.snackBar.open('❌ Max retries exceeded. No further attempts will be made, Please refresh page if connection is working.','Close', { duration: 3000 });
     }
   }  
   
