@@ -117,17 +117,18 @@ export class ProjectsComponent implements OnInit {
       // ✅ Use Binder link for .ipynb files
       if (path != 'NULL' && path.endsWith('.ipynb')) {
         const filename = this.getFilename(path);
-        const binderURL = `https://mybinder.org/v2/gh/OvillaLince/cv_app/main?filepath=notebooks/${filename}`;
-
-        const buttonHTML = `
-          <a href="${binderURL}" target="_blank" rel="noopener" class="binder-launch">
-            🚀 Open Notebook in Binder
-          </a>
+        const jliteurl =   `assets/jupyterlite/index.html?path=files/${filename}`;
+        const fileHTML = `
+          <iframe
+            [src]="${jliteurl}"
+            width="100%"
+            height="600px"
+            frameborder="0">
+          </iframe>
         `;
-
         project.loaded_file = {
           name: filename,
-          content: this.sanitizer.bypassSecurityTrustHtml(buttonHTML)
+          content: this.sanitizer.bypassSecurityTrustHtml(fileHTML)
         };
       }
 
