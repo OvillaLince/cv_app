@@ -119,18 +119,15 @@ export class ProjectsComponent implements OnInit {
         const filename = this.getFilename(path);
         const binderURL = `https://mybinder.org/v2/gh/OvillaLince/cv_app/main?filepath=notebooks/${filename}`;
 
-        const iframeHTML = `
-          <iframe src="${binderURL}"
-                  width="100%"
-                  height="500px"
-                  frameborder="0"
-                  allowfullscreen
-                  class="binder-frame">
-          </iframe>
+        const buttonHTML = `
+          <a href="${binderURL}" target="_blank" rel="noopener" class="binder-launch">
+            🚀 Open Notebook in Binder
+          </a>
         `;
+
         project.loaded_file = {
           name: filename,
-          content: this.sanitizer.bypassSecurityTrustHtml(iframeHTML)
+          content: this.sanitizer.bypassSecurityTrustHtml(buttonHTML)
         };
       }
 
