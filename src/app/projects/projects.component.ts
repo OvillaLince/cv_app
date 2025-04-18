@@ -44,7 +44,7 @@ export class ProjectsComponent implements OnInit {
     }
   
     this.isLoadingDB = true;
-    this.isLoadingDS = true;
+    this.isLoadingDS = false; // not yet loading DS
   
     // ---- DB Projects ----
     const DBtimeoutId = setTimeout(() => {
@@ -59,6 +59,9 @@ export class ProjectsComponent implements OnInit {
         this.dbProjects = data;
         this.loadProjectFiles(this.dbProjects);
         this.snackBar.open('Database Projects loaded successfully ✅', 'Close', { duration: 2500 });
+  
+        // ✅ Now start DS call
+        this.loadDSProjects();
       },
       error: err => {
         clearTimeout(DBtimeoutId);
@@ -70,8 +73,12 @@ export class ProjectsComponent implements OnInit {
         this.isLoadingDB = false;
       }
     });
+  }
   
-    // ---- DS Projects ----
+
+  loadDSProjects(): void {
+    this.isLoadingDS = true;
+  
     const DStimeoutId = setTimeout(() => {
       DSsub.unsubscribe();
       this.snackBar.open('⏱️ DS request timed out after 10s', 'Close', { duration: 3000 });
@@ -95,6 +102,7 @@ export class ProjectsComponent implements OnInit {
       }
     });
   }
+  
   scheduleRetry(): void {
     this.retryCount++;
     if (this.retryCount <= this.MAX_RETRIES) {
