@@ -37,23 +37,10 @@ export class ProjectsComponent implements OnInit {
     this.loadProjects();
   }
   loadProjects(): void {
-    if (this.retryCount >= this.MAX_RETRIES) {
-      console.warn('❌ Max retry attempts reached.');
-      return;
-    }
-  
     this.isLoading = true;
-  
-    const timeoutId = setTimeout(() => {
-      sub.unsubscribe();
-      this.snackBar.open('⏱️ Project request timed out after 10s', 'Close', { duration: 3000 });
-      this.scheduleRetry();
-    }, 10000);
-  
     const sub = this.http.get<{ dbProjects: Project[]; dsProjects: Project[] }>('https://cv-app-backend.onrender.com/api/projects/all')
       .subscribe({
         next: (response) => {
-          clearTimeout(timeoutId);
           this.dbProjects = response.dbProjects;
           this.dsProjects = response.dsProjects;
   
@@ -63,26 +50,15 @@ export class ProjectsComponent implements OnInit {
           this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
-          clearTimeout(timeoutId);
           console.error('All projects error:', err);
           this.snackBar.open('❌ Failed to load projects', 'Close', { duration: 3000 });
-          this.scheduleRetry();
+          this.refresh()
         },
         complete: () => {
           this.isLoading = false;
         }
       });
   }
-  
-  scheduleRetry(): void {
-    this.retryCount++;
-    if (this.retryCount <= this.MAX_RETRIES) {
-      console.warn(`🔁 Retrying (${this.retryCount}/${this.MAX_RETRIES}) in ${this.RETRY_DELAY_MS / 1000}s...`);
-      setTimeout(() => this.refresh(), this.RETRY_DELAY_MS);
-    } else {
-      this.snackBar.open('❌ Max retries exceeded. No further attempts will be made, Please refresh page if connection is working.','Close', { duration: 3000 });
-    }
-  }  
   
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
