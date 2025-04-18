@@ -38,7 +38,7 @@ export class ProjectsComponent implements OnInit {
   }
   loadProjects(): void {
     this.isLoading = true;
-    const sub = this.http.get<{ dbProjects: Project[]; dsProjects: Project[] }>('https://cv-app-backend.onrender.com/api/projects/all')
+    this.http.get<{ dbProjects: Project[]; dsProjects: Project[] }>('https://cv-app-backend.onrender.com/api/projects/all')
       .subscribe({
         next: (response) => {
           this.dbProjects = response.dbProjects;
@@ -51,7 +51,6 @@ export class ProjectsComponent implements OnInit {
         },
         error: (err) => {
           console.error('All projects error:', err);
-          this.snackBar.open('❌ Failed to load projects', 'Close', { duration: 3000 });
           this.refresh()
         },
         complete: () => {
