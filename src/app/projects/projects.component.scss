@@ -86,3 +86,13 @@
 ::ng-deep .mat-tab-group {
   overflow: hidden;
 }
+.loading-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #666;
+}
