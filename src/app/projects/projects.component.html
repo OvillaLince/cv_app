@@ -14,8 +14,8 @@
       <mat-tab label="Database Projects">
 
         <ng-container *ngIf="isLoadingDB; else dbContent">
-          <div class="tab-loading">
-            <mat-spinner diameter="48"></mat-spinner>
+          <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+          <div class="tab-loading-message">
             <p>Loading Database Projects...</p>
           </div>
         </ng-container>
@@ -64,9 +64,9 @@
 
       <mat-tab label="Data Science Projects">
         <ng-container *ngIf="isLoadingDS; else dsContent">
-          <div class="tab-loading">
-            <mat-spinner diameter="48"></mat-spinner>
-            <p>Loading Data Science Projects...</p>
+          <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+          <div class="tab-loading-message">
+            <p>Loading Science Projects...</p>
           </div>
         </ng-container>
         
