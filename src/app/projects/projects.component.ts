@@ -32,6 +32,9 @@ export class ProjectsComponent implements OnInit {
   constructor(private http: HttpClient, private sanitizer: DomSanitizer,private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
+   this.loadProjects();
+  }
+  loadProjects(){
     this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db').subscribe({
       next: data => {
         this.dbProjects = data;
@@ -41,6 +44,7 @@ export class ProjectsComponent implements OnInit {
         this.isLoadingDB = false;
         console.error(err);
         this.snackBar.open('❌ Failed to load database projects', 'Close', { duration: 3000 });
+        this.refresh()
       },
       complete: () => {
         this.isLoadingDB = false;
@@ -57,13 +61,13 @@ export class ProjectsComponent implements OnInit {
         this.isLoadingDS = false;
         console.error(err);
         this.snackBar.open('❌ Failed to load data science projects', 'Close', { duration: 3000 });
+        this.refresh()
       },
       complete: () => {
         this.isLoadingDS = false;
         this.snackBar.open('Data Science Projects loaded successfully ✅', 'Close', { duration: 2500 });
       }
     });
-    
   }
 
   loadProjectFiles(projects: Project[]) {
@@ -128,5 +132,8 @@ export class ProjectsComponent implements OnInit {
   }
   isMobile(): boolean {
     return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
+  refresh(){
+    this.loadProjects();
   }
 }
