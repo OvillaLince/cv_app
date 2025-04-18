@@ -32,55 +32,61 @@ export class ProjectsComponent implements OnInit {
   constructor(private http: HttpClient, private sanitizer: DomSanitizer,private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
-   this.loadProjects();
+    this.loadProjects();
   }
-  loadProjects(){
+  
+  loadProjects(): void {
     this.isLoadingDB = true;
+    this.isLoadingDS = true;
+  
+    // ---- DB Projects ----
     const DBsub = this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db').subscribe({
       next: data => {
-        this.dbProjects = data;
-        this.isLoadingDB = false;
         clearTimeout(DBtimeoutId);
+        this.dbProjects = data;
         this.loadProjectFiles(this.dbProjects);
         this.snackBar.open('Database Projects loaded successfully ✅', 'Close', { duration: 2500 });
-
       },
       error: err => {
-        this.isLoadingDB = false;
-        console.error(err);
+        clearTimeout(DBtimeoutId);
+        console.error('DB error:', err);
         this.snackBar.open('❌ Failed to load database projects', 'Close', { duration: 3000 });
-        this.refresh()
+      },
+      complete: () => {
+        this.isLoadingDB = false;
       }
     });
+  
     const DBtimeoutId = setTimeout(() => {
       DBsub.unsubscribe();
-      this.snackBar.open('Timeout occurred', '', { duration: 3000 });
-      this.loadProjects()
+      this.isLoadingDB = false;
+      this.snackBar.open('⏱️ DB request timed out after 10s', 'Close', { duration: 3000 });
     }, 10000);
-    
-    this.isLoadingDS = true;
+  
+    // ---- DS Projects ----
     const DSsub = this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/ds').subscribe({
       next: data => {
-        this.dsProjects = data;
-        this.isLoadingDS = false;
         clearTimeout(DStimeoutId);
+        this.dsProjects = data;
         this.loadProjectFiles(this.dsProjects);
       },
       error: err => {
-        console.error(err);
+        clearTimeout(DStimeoutId);
+        console.error('DS error:', err);
         this.snackBar.open('❌ Failed to load data science projects', 'Close', { duration: 3000 });
-        this.refresh()
+      },
+      complete: () => {
+        this.isLoadingDS = false;
       }
     });
+  
     const DStimeoutId = setTimeout(() => {
       DSsub.unsubscribe();
-      this.snackBar.open('Timeout occurred', '', { duration: 3000 });
-      this.loadProjects()
+      this.isLoadingDS = false;
+      this.snackBar.open('⏱️ DS request timed out after 10s', 'Close', { duration: 3000 });
     }, 10000);
   }
- 
-
-
+  
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
       const path = project.codeFile;
