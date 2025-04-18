@@ -10,7 +10,7 @@
 
       <h1 class="page-title">My Projects</h1>
     </div>
-    <div *ngIf="isLoadingDB && isLoadingDS" class="loading-overlay">
+    <div *ngIf="isLoadingDB || isLoadingDS" class="loading-overlay">
       <mat-spinner diameter="48"></mat-spinner>
       <p>Loading projects...</p>
     </div>
