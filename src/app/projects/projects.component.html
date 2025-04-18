@@ -71,7 +71,7 @@
         </ng-container>
         
         <ng-template #dsContent>
-          <mat-accordion multi="false" *ngIf="dbProjects.length > 0">
+          <mat-accordion multi="false" *ngIf="dsProjects.length > 0">
             <mat-expansion-panel
               *ngFor="let project of dsProjects; let i = index"
               (opened)="onPanelOpened(i)">

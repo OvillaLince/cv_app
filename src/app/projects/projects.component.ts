@@ -68,7 +68,7 @@ export class ProjectsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.dsProjects = response;  
-          this.loadProjectFiles(this.dbProjects);  
+          this.loadProjectFiles(this.dsProjects);  
           this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
@@ -76,7 +76,7 @@ export class ProjectsComponent implements OnInit {
           this.loadDsProjects();
         },
         complete: () => {
-          this.isLoadingDB = false;
+          this.isLoadingDS = false;
         }
       });
   }
