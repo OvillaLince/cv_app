@@ -64,7 +64,7 @@ export class ProjectsComponent implements OnInit {
   }
   loadDsProjects(): void {
     this.isLoadingDS = true;
-    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/ds')
+    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/project/ds')
       .subscribe({
         next: (response) => {
           this.dsProjects = response;  
