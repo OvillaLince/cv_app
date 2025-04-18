@@ -25,8 +25,7 @@ interface Project {
 export class ProjectsComponent implements OnInit {
   dbProjects: Project[] = [];
   dsProjects: Project[] = [];
-  isLoadingDB = false;
-  isLoadingDS = false;
+  isLoading = false;
   retryCount = 0;
   MAX_RETRIES = 3;
   RETRY_DELAY_MS = 3000;
@@ -37,71 +36,42 @@ export class ProjectsComponent implements OnInit {
   ngOnInit(): void {
     this.loadProjects();
   }
-  
   loadProjects(): void {
     if (this.retryCount >= this.MAX_RETRIES) {
       console.warn('❌ Max retry attempts reached.');
       return;
     }
   
-    this.isLoadingDB = true;
-    this.isLoadingDS = false; // not yet loading DS
+    this.isLoading = true;
   
-    // ---- DB Projects ----
-    const DBtimeoutId = setTimeout(() => {
-      DBsub.unsubscribe();
-      this.snackBar.open('⏱️ DB request timed out after 10s', 'Close', { duration: 3000 });
+    const timeoutId = setTimeout(() => {
+      sub.unsubscribe();
+      this.snackBar.open('⏱️ Project request timed out after 10s', 'Close', { duration: 3000 });
       this.scheduleRetry();
     }, 10000);
   
-    const DBsub = this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db').subscribe({
-      next: data => {
-        clearTimeout(DBtimeoutId);
-        this.dbProjects = data;
-        this.loadProjectFiles(this.dbProjects);
-        this.snackBar.open('Database Projects loaded successfully ✅', 'Close', { duration: 2500 });
+    const sub = this.http.get<{ dbProjects: Project[]; dsProjects: Project[] }>('https://cv-app-backend.onrender.com/api/projects/all')
+      .subscribe({
+        next: (response) => {
+          clearTimeout(timeoutId);
+          this.dbProjects = response.dbProjects;
+          this.dsProjects = response.dsProjects;
   
-        // ✅ Now start DS call
-        this.loadDSProjects();
-      },
-      error: err => {
-        clearTimeout(DBtimeoutId);
-        console.error('DB error:', err);
-        this.snackBar.open('❌ Failed to load database projects', 'Close', { duration: 3000 });
-        this.scheduleRetry();
-      },
-      complete: () => {
-        this.isLoadingDB = false;
-      }
-    });
-  }
+          this.loadProjectFiles(this.dbProjects);
+          this.loadProjectFiles(this.dsProjects);
   
-
-  loadDSProjects(): void {
-    this.isLoadingDS = true;
-  
-    const DStimeoutId = setTimeout(() => {
-      DSsub.unsubscribe();
-      this.snackBar.open('⏱️ DS request timed out after 10s', 'Close', { duration: 3000 });
-      this.scheduleRetry();
-    }, 10000);
-  
-    const DSsub = this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/ds').subscribe({
-      next: data => {
-        clearTimeout(DStimeoutId);
-        this.dsProjects = data;
-        this.loadProjectFiles(this.dsProjects);
-      },
-      error: err => {
-        clearTimeout(DStimeoutId);
-        console.error('DS error:', err);
-        this.snackBar.open('❌ Failed to load data science projects', 'Close', { duration: 3000 });
-        this.scheduleRetry();
-      },
-      complete: () => {
-        this.isLoadingDS = false;
-      }
-    });
+          this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
+        },
+        error: (err) => {
+          clearTimeout(timeoutId);
+          console.error('All projects error:', err);
+          this.snackBar.open('❌ Failed to load projects', 'Close', { duration: 3000 });
+          this.scheduleRetry();
+        },
+        complete: () => {
+          this.isLoading = false;
+        }
+      });
   }
   
   scheduleRetry(): void {
@@ -126,7 +96,7 @@ export class ProjectsComponent implements OnInit {
       // ✅ Use Binder link for .ipynb files
       if (path != 'NULL' && path.endsWith('.ipynb')) {
         const filename = this.getFilename(path);
-        const jliteurl = `assets/jupyterlite/index.html?path=files/${filename}`;
+        const jliteurl = `cv_app/assets/jupyterlite/index.html?path=files/${filename}`;
         const fileHTML = `
           <iframe
             src="${jliteurl}"

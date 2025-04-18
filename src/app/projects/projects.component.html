@@ -10,11 +10,11 @@
 
       <h1 class="page-title">My Projects</h1>
     </div>
-    <div *ngIf="isLoadingDB || isLoadingDS" class="loading-overlay">
+    <div *ngIf="isLoading" class="loading-overlay">
       <mat-spinner diameter="48"></mat-spinner>
       <p>Loading projects...</p>
     </div>
-    <mat-tab-group *ngIf="!isLoadingDB && !isLoadingDS" mat-stretch-tabs dynamicHeight>
+    <mat-tab-group *ngIf="!isLoading" mat-stretch-tabs dynamicHeight>
       <mat-tab label="Database Projects">
         <mat-accordion multi="false">
           <mat-expansion-panel *ngFor="let project of dbProjects">
