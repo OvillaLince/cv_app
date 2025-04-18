@@ -10,98 +10,114 @@
 
       <h1 class="page-title">My Projects</h1>
     </div>
-    <div *ngIf="isLoading" class="loading-overlay">
-      <mat-spinner diameter="48"></mat-spinner>
-      <p>Loading projects...</p>
-    </div>
-    <mat-tab-group *ngIf="!isLoading" mat-stretch-tabs dynamicHeight>
+    <mat-tab-group (selectedTabChange)="onTabChange($event)" mat-stretch-tabs dynamicHeight>
       <mat-tab label="Database Projects">
-        <mat-accordion multi="false">
-          <mat-expansion-panel *ngFor="let project of dbProjects">
-            <mat-expansion-panel-header>
-              <mat-panel-title>{{ project.title }}</mat-panel-title>
-            </mat-expansion-panel-header>
 
-            <div class="project-wrapper">
-              <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
-                <div class="code-wrapper">
-                  <div *ngIf="project.loaded_file; else loadingDb">
-                    <div [innerHTML]="project.loaded_file.content"></div>
+        <ng-container *ngIf="isLoadingDB; else dbContent">
+          <div class="tab-loading">
+            <mat-spinner diameter="48"></mat-spinner>
+            <p>Loading Database Projects...</p>
+          </div>
+        </ng-container>
+
+        <ng-template #dbContent>
+          <mat-accordion multi="false" *ngIf="dbProjects.length > 0">
+            <mat-expansion-panel *ngFor="let project of dbProjects">
+              <mat-expansion-panel-header>
+                <mat-panel-title>{{ project.title }}</mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <div class="project-wrapper">
+                <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
+                  <div class="code-wrapper">
+                    <div *ngIf="project.loaded_file; else loadingDb">
+                      <div [innerHTML]="project.loaded_file.content"></div>
+                    </div>
+                    <ng-template #loadingDb>
+                      <p class="loading-message">Loading code...</p>
+                    </ng-template>
                   </div>
-                  <ng-template #loadingDb>
-                    <p class="loading-message">Loading code...</p>
+                </div>
+
+                <div class="image-column" *ngIf="project.safe_image_url">
+                  <ng-container *ngIf="isPdf(project.image); else imageViewDb">
+                    <ng-container *ngIf="!isMobile(); else mobilePdfDb">
+                      <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
+                        <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
+                      </object>
+                    </ng-container>
+                    <ng-template #mobilePdfDb>
+                      <div class="mobile-pdf-message">
+                        <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+                      </div>
+                    </ng-template>
+                  </ng-container>
+                  <ng-template #imageViewDb>
+                    <img [src]="project.safe_image_url" alt="Project image" />
                   </ng-template>
                 </div>
               </div>
-
-              <div class="image-column" *ngIf="project.safe_image_url">
-                <ng-container *ngIf="isPdf(project.image); else imageViewDb">
-                  <ng-container *ngIf="!isMobile(); else mobilePdfDb">
-                    <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
-                      <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
-                    </object>
-                  </ng-container>
-                  <ng-template #mobilePdfDb>
-                    <div class="mobile-pdf-message">
-                      <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
-                    </div>
-                  </ng-template>
-                </ng-container>
-                <ng-template #imageViewDb>
-                  <img [src]="project.safe_image_url" alt="Project image" />
-                </ng-template>
-              </div>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </ng-template>
       </mat-tab>
 
       <mat-tab label="Data Science Projects">
-        <mat-accordion multi="false">
-          <mat-expansion-panel
-            *ngFor="let project of dsProjects; let i = index"
-            (opened)="onPanelOpened(i)">
-            
-            <mat-expansion-panel-header>
-              <mat-panel-title>{{ project.title }}</mat-panel-title>
-            </mat-expansion-panel-header>
-      
-            <div class="project-wrapper">
-      
-              <!-- Code Column (lazy JupyterLite iframe with caching) -->
-              <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
-                <div class="code-wrapper">
-                  <ng-container *ngIf="openedDsPanels.has(i); else loadingMessage">
-                    <div [innerHTML]="project.loaded_file?.content"></div>
+        <ng-container *ngIf="isLoadingDS; else dsContent">
+          <div class="tab-loading">
+            <mat-spinner diameter="48"></mat-spinner>
+            <p>Loading Data Science Projects...</p>
+          </div>
+        </ng-container>
+        
+        <ng-template #dsContent>
+          <mat-accordion multi="false" *ngIf="dbProjects.length > 0">
+            <mat-expansion-panel
+              *ngFor="let project of dsProjects; let i = index"
+              (opened)="onPanelOpened(i)">
+              
+              <mat-expansion-panel-header>
+                <mat-panel-title>{{ project.title }}</mat-panel-title>
+              </mat-expansion-panel-header>
+        
+              <div class="project-wrapper">
+        
+                <!-- Code Column (lazy JupyterLite iframe with caching) -->
+                <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
+                  <div class="code-wrapper">
+                    <ng-container *ngIf="openedDsPanels.has(i); else loadingMessage">
+                      <div [innerHTML]="project.loaded_file?.content"></div>
+                    </ng-container>
+                    <ng-template #loadingMessage>
+                      <p class="loading-message">Notebook will load when panel is opened.</p>
+                    </ng-template>
+                  </div>
+                </div>
+        
+                <!-- Image or PDF Preview -->
+                <div class="image-column" *ngIf="project.safe_image_url">
+                  <ng-container *ngIf="isPdf(project.image); else imageViewDs">
+                    <ng-container *ngIf="!isMobile(); else mobilePdfDs">
+                      <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
+                        <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
+                      </object>
+                    </ng-container>
+                    <ng-template #mobilePdfDs>
+                      <div class="mobile-pdf-message">
+                        <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+                      </div>
+                    </ng-template>
                   </ng-container>
-                  <ng-template #loadingMessage>
-                    <p class="loading-message">Notebook will load when panel is opened.</p>
+                  <ng-template #imageViewDs>
+                    <img [src]="project.safe_image_url" alt="Project image" />
                   </ng-template>
                 </div>
+        
               </div>
-      
-              <!-- Image or PDF Preview -->
-              <div class="image-column" *ngIf="project.safe_image_url">
-                <ng-container *ngIf="isPdf(project.image); else imageViewDs">
-                  <ng-container *ngIf="!isMobile(); else mobilePdfDs">
-                    <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
-                      <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
-                    </object>
-                  </ng-container>
-                  <ng-template #mobilePdfDs>
-                    <div class="mobile-pdf-message">
-                      <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
-                    </div>
-                  </ng-template>
-                </ng-container>
-                <ng-template #imageViewDs>
-                  <img [src]="project.safe_image_url" alt="Project image" />
-                </ng-template>
-              </div>
-      
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </ng-template>
+        
       </mat-tab>
       
     </mat-tab-group>

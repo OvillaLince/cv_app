@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 
 interface CodeFile {
   name: string;
@@ -30,40 +31,64 @@ interface AllProjectsResponse {
 export class ProjectsComponent implements OnInit {
   dbProjects: Project[] = [];
   dsProjects: Project[] = [];
-  isLoading = false;
-  retryCount = 0;
-  MAX_RETRIES = 3;
-  RETRY_DELAY_MS = 3000;
+  isLoadingDB = false;
+  isLoadingDS = false;
+  selectedTabIndex = 0;
+
+ 
   openedDsPanels = new Set<number>();
   
   constructor(private http: HttpClient, private sanitizer: DomSanitizer,private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
-    this.loadProjects();
+    this.loadDbProjects();
   }
-  loadProjects(): void {
-    this.isLoading = true;
-    this.http.get<AllProjectsResponse>('https://cv-app-backend.onrender.com/api/projects/all')
+
+  loadDbProjects(): void {
+    this.isLoadingDB = true;
+    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db')
       .subscribe({
         next: (response) => {
-          this.dbProjects = response.dbProject;
-          this.dsProjects = response.dsProject;
-  
-          this.loadProjectFiles(this.dbProjects);
-          this.loadProjectFiles(this.dsProjects);
-  
+          this.dbProjects = response;  
+          this.loadProjectFiles(this.dbProjects);  
           this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
           console.error('All projects error:', err);
-          this.refresh()
+          this.loadDbProjects();
         },
         complete: () => {
-          this.isLoading = false;
+          this.isLoadingDB = false;
         }
       });
   }
+  loadDsProjects(): void {
+    this.isLoadingDS = true;
+    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/ds')
+      .subscribe({
+        next: (response) => {
+          this.dsProjects = response;  
+          this.loadProjectFiles(this.dbProjects);  
+          this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
+        },
+        error: (err) => {
+          console.error('All projects error:', err);
+          this.loadDsProjects();
+        },
+        complete: () => {
+          this.isLoadingDB = false;
+        }
+      });
+  }
+  onTabChange(event: MatTabChangeEvent): void {
+    this.selectedTabIndex = event.index;
   
+    if (event.index === 0 && this.dbProjects.length === 0) {
+      this.loadDbProjects();
+    } else if (event.index === 1 && this.dsProjects.length === 0) {
+      this.loadDsProjects();
+    }
+  }
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
       const path = project.codeFile;
@@ -127,9 +152,6 @@ export class ProjectsComponent implements OnInit {
   }
   isMobile(): boolean {
     return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  }
-  refresh(){
-    this.loadProjects();
   }
   onPanelOpened(index: number): void {
     this.openedDsPanels.add(index);
