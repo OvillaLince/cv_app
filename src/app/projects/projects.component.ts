@@ -51,6 +51,7 @@ export class ProjectsComponent implements OnInit {
         clearTimeout(DBtimeoutId);
         console.error('DB error:', err);
         this.snackBar.open('❌ Failed to load database projects', 'Close', { duration: 3000 });
+        this.refresh();
       },
       complete: () => {
         this.isLoadingDB = false;
@@ -60,7 +61,7 @@ export class ProjectsComponent implements OnInit {
     const DBtimeoutId = setTimeout(() => {
       DBsub.unsubscribe();
       this.snackBar.open('⏱️ DB request timed out after 10s', 'Close', { duration: 3000 });
-      this.loadProjects()
+      this.refresh();
     }, 10000);
   
     // ---- DS Projects ----
@@ -74,8 +75,10 @@ export class ProjectsComponent implements OnInit {
         clearTimeout(DStimeoutId);
         console.error('DS error:', err);
         this.snackBar.open('❌ Failed to load data science projects', 'Close', { duration: 3000 });
+        this.refresh();
       },
       complete: () => {
+        
         this.isLoadingDS = false;
       }
     });
@@ -83,7 +86,7 @@ export class ProjectsComponent implements OnInit {
     const DStimeoutId = setTimeout(() => {
       DSsub.unsubscribe();
       this.snackBar.open('⏱️ DS request timed out after 10s', 'Close', { duration: 3000 });
-      this.loadProjects()
+      this.refresh();
     }, 10000);
   }
   
