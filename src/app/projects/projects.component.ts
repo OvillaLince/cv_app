@@ -59,8 +59,8 @@ export class ProjectsComponent implements OnInit {
   
     const DBtimeoutId = setTimeout(() => {
       DBsub.unsubscribe();
-      this.isLoadingDB = false;
       this.snackBar.open('⏱️ DB request timed out after 10s', 'Close', { duration: 3000 });
+      this.loadProjects()
     }, 10000);
   
     // ---- DS Projects ----
@@ -82,8 +82,8 @@ export class ProjectsComponent implements OnInit {
   
     const DStimeoutId = setTimeout(() => {
       DSsub.unsubscribe();
-      this.isLoadingDS = false;
       this.snackBar.open('⏱️ DS request timed out after 10s', 'Close', { duration: 3000 });
+      this.loadProjects()
     }, 10000);
   }
   
