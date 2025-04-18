@@ -27,7 +27,9 @@ export class ProjectsComponent implements OnInit {
   dsProjects: Project[] = [];
   isLoadingDB = false;
   isLoadingDS = false;
-
+  retryCount = 0;
+  MAX_RETRIES = 3;
+  RETRY_DELAY_MS = 3000;
 
   constructor(private http: HttpClient, private sanitizer: DomSanitizer,private snackBar: MatSnackBar) {}
 
@@ -36,10 +38,21 @@ export class ProjectsComponent implements OnInit {
   }
   
   loadProjects(): void {
+    if (this.retryCount >= this.MAX_RETRIES) {
+      console.warn('❌ Max retry attempts reached.');
+      return;
+    }
+  
     this.isLoadingDB = true;
     this.isLoadingDS = true;
   
     // ---- DB Projects ----
+    const DBtimeoutId = setTimeout(() => {
+      DBsub.unsubscribe();
+      this.snackBar.open('⏱️ DB request timed out after 10s', 'Close', { duration: 3000 });
+      this.scheduleRetry();
+    }, 10000);
+  
     const DBsub = this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db').subscribe({
       next: data => {
         clearTimeout(DBtimeoutId);
@@ -51,20 +64,20 @@ export class ProjectsComponent implements OnInit {
         clearTimeout(DBtimeoutId);
         console.error('DB error:', err);
         this.snackBar.open('❌ Failed to load database projects', 'Close', { duration: 3000 });
-        this.refresh();
+        this.scheduleRetry();
       },
       complete: () => {
         this.isLoadingDB = false;
       }
     });
   
-    const DBtimeoutId = setTimeout(() => {
-      DBsub.unsubscribe();
-      this.snackBar.open('⏱️ DB request timed out after 10s', 'Close', { duration: 3000 });
-      this.refresh();
+    // ---- DS Projects ----
+    const DStimeoutId = setTimeout(() => {
+      DSsub.unsubscribe();
+      this.snackBar.open('⏱️ DS request timed out after 10s', 'Close', { duration: 3000 });
+      this.scheduleRetry();
     }, 10000);
   
-    // ---- DS Projects ----
     const DSsub = this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/ds').subscribe({
       next: data => {
         clearTimeout(DStimeoutId);
@@ -75,20 +88,22 @@ export class ProjectsComponent implements OnInit {
         clearTimeout(DStimeoutId);
         console.error('DS error:', err);
         this.snackBar.open('❌ Failed to load data science projects', 'Close', { duration: 3000 });
-        this.refresh();
+        this.scheduleRetry();
       },
       complete: () => {
-        
         this.isLoadingDS = false;
       }
     });
-  
-    const DStimeoutId = setTimeout(() => {
-      DSsub.unsubscribe();
-      this.snackBar.open('⏱️ DS request timed out after 10s', 'Close', { duration: 3000 });
-      this.refresh();
-    }, 10000);
   }
+  scheduleRetry(): void {
+    this.retryCount++;
+    if (this.retryCount <= this.MAX_RETRIES) {
+      console.warn(`🔁 Retrying (${this.retryCount}/${this.MAX_RETRIES}) in ${this.RETRY_DELAY_MS / 1000}s...`);
+      setTimeout(() => this.refresh(), this.RETRY_DELAY_MS);
+    } else {
+      console.error('❌ Max retries exceeded. No further attempts will be made.');
+    }
+  }  
   
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
