@@ -117,10 +117,10 @@ export class ProjectsComponent implements OnInit {
       // ✅ Use Binder link for .ipynb files
       if (path != 'NULL' && path.endsWith('.ipynb')) {
         const filename = this.getFilename(path);
-        const jliteurl =   `assets/jupyterlite/index.html?path=files/${filename}`;
+        const jliteurl = `assets/jupyterlite/index.html?path=files/${filename}`;
         const fileHTML = `
           <iframe
-            [src]="${jliteurl}"
+            src="${jliteurl}"
             width="100%"
             height="600px"
             frameborder="0">
