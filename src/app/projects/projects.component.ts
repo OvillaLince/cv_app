@@ -32,32 +32,38 @@ export class ProjectsComponent implements OnInit {
   constructor(private http: HttpClient, private sanitizer: DomSanitizer,private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
-    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db').subscribe(data => {
-      this.dbProjects = data;
-      this.loadProjectFiles(this.dbProjects);
-    },
-    (err) =>{
-      this.isLoadingDB = false;
-      console.error(err);
-      this.snackBar.open('❌ Failed to load database projects', 'Close', { duration: 3000 });
-    },
-    () => {
-      this.isLoadingDB = false;
-      this.snackBar.open('Database Projects loaded successfully ✅', 'Close', { duration: 2500 });
+    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db').subscribe({
+      next: data => {
+        this.dbProjects = data;
+        this.loadProjectFiles(this.dbProjects);
+      },
+      error: err => {
+        this.isLoadingDB = false;
+        console.error(err);
+        this.snackBar.open('❌ Failed to load database projects', 'Close', { duration: 3000 });
+      },
+      complete: () => {
+        this.isLoadingDB = false;
+        this.snackBar.open('Database Projects loaded successfully ✅', 'Close', { duration: 2500 });
+      }
     });
-    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/ds').subscribe(data => {
-      this.dsProjects = data;
-      this.loadProjectFiles(this.dsProjects);
-    },
-    (err) =>{
-      this.isLoadingDS = false;
-      console.error(err);
-      this.snackBar.open('❌ Failed to load data science projects', 'Close', { duration: 3000 });
-    },
-    () => {
-      this.isLoadingDS = false;
-      this.snackBar.open('Data Science Projects loaded successfully ✅', 'Close', { duration: 2500 });
+    
+    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/ds').subscribe({
+      next: data => {
+        this.dsProjects = data;
+        this.loadProjectFiles(this.dsProjects);
+      },
+      error: err => {
+        this.isLoadingDS = false;
+        console.error(err);
+        this.snackBar.open('❌ Failed to load data science projects', 'Close', { duration: 3000 });
+      },
+      complete: () => {
+        this.isLoadingDS = false;
+        this.snackBar.open('Data Science Projects loaded successfully ✅', 'Close', { duration: 2500 });
+      }
     });
+    
   }
 
   loadProjectFiles(projects: Project[]) {
