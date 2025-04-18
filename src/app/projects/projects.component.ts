@@ -28,13 +28,13 @@ export class ProjectsComponent implements OnInit {
   constructor(private http: HttpClient, private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
-    this.http.get<Project[]>('http://192.168.56.1:5000/api/projects/db').subscribe(data => {
+    this.http.get<Project[]>('https://cv_app_backend.onrender.com/api/projects/db').subscribe(data => {
       this.dbProjects = data;
       console.log(this.dbProjects)
       this.loadProjectFiles(this.dbProjects);
     });
   
-    this.http.get<Project[]>('http://192.168.56.1:5000/api/projects/ds').subscribe(data => {
+    this.http.get<Project[]>('https://cv_app_backend.onrender.com/api/projects/ds').subscribe(data => {
       this.dsProjects = data;
       console.log(this.dsProjects)
 
