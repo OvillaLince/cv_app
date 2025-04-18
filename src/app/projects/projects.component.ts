@@ -74,8 +74,8 @@ export class ProjectsComponent implements OnInit {
     });
     const DStimeoutId = setTimeout(() => {
       DSsub.unsubscribe();
-      this.isLoadingDS = false;
       this.snackBar.open('Timeout occurred', '', { duration: 3000 });
+      this.loadProjects()
     }, 10000);
   }
  
