@@ -1,99 +1,99 @@
-<div class="projects-container">
+<div class="mdl-grid projects-container">
 
-  <!-- 🔙 Back Button -->
-  <button mat-button class="back-button" routerLink="/home">
-    <mat-icon>chevron_left</mat-icon>
-  </button>
+  <div class="mdl-cell mdl-cell--12-col mdl-cell--8-col-tablet mdl-cell--4-col-phone">
 
-  <mat-tab-group>
-    <mat-tab label="Database Projects">
-      <mat-accordion multi="false">
-        <mat-expansion-panel *ngFor="let project of dbProjects">
-          <mat-expansion-panel-header>
-            <mat-panel-title>{{ project.title }}</mat-panel-title>
-          </mat-expansion-panel-header>
+    <!-- Back button and title -->
+    <div class="header">
+      <button mat-button class="back-button" routerLink="/home">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
 
-          <div class="project-wrapper">
+      <h1 class="page-title">My Projects</h1>
+    </div>
 
-            <!-- Code Column -->
-            <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
-              <div class="code-wrapper">
-                <div *ngIf="project.loaded_file; else loadingDb">
-                  <div [innerHTML]="project.loaded_file.content"></div>
+    <mat-tab-group mat-stretch-tabs dynamicHeight>
+      <mat-tab label="Database Projects">
+        <mat-accordion multi="false">
+          <mat-expansion-panel *ngFor="let project of dbProjects">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ project.title }}</mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="project-wrapper">
+              <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
+                <div class="code-wrapper">
+                  <div *ngIf="project.loaded_file; else loadingDb">
+                    <div [innerHTML]="project.loaded_file.content"></div>
+                  </div>
+                  <ng-template #loadingDb>
+                    <p class="loading-message">Loading code...</p>
+                  </ng-template>
                 </div>
-                <ng-template #loadingDb>
-                  <p class="loading-message">Loading code...</p>
+              </div>
+
+              <div class="image-column" *ngIf="project.safe_image_url">
+                <ng-container *ngIf="isPdf(project.image); else imageViewDb">
+                  <ng-container *ngIf="!isMobile(); else mobilePdfDb">
+                    <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
+                      <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
+                    </object>
+                  </ng-container>
+                  <ng-template #mobilePdfDb>
+                    <div class="mobile-pdf-message">
+                      <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+                    </div>
+                  </ng-template>
+                </ng-container>
+                <ng-template #imageViewDb>
+                  <img [src]="project.safe_image_url" alt="Project image" />
                 </ng-template>
               </div>
             </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </mat-tab>
 
-            <!-- Image / PDF Column -->
-            <div class="image-column" *ngIf="project.safe_image_url">
-              <ng-container *ngIf="isPdf(project.image); else imageViewDb">
-                <ng-container *ngIf="!isMobile(); else mobilePdfDb">
-                  <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
-                    <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
-                  </object>
-                </ng-container>
-                <ng-template #mobilePdfDb>
-                  <div class="mobile-pdf-message">
-                    <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+      <mat-tab label="Data Science Projects">
+        <mat-accordion multi="false">
+          <mat-expansion-panel *ngFor="let project of dsProjects">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ project.title }}</mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="project-wrapper">
+              <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
+                <div class="code-wrapper">
+                  <div *ngIf="project.loaded_file; else loadingDs">
+                    <div [innerHTML]="project.loaded_file.content"></div>
                   </div>
-                </ng-template>
-              </ng-container>
-              <ng-template #imageViewDb>
-                <img [src]="project.safe_image_url" alt="Project image" />
-              </ng-template>
-            </div>
-
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </mat-tab>
-
-    <mat-tab label="Data Science Projects">
-      <mat-accordion multi="false">
-        <mat-expansion-panel *ngFor="let project of dsProjects">
-          <mat-expansion-panel-header>
-            <mat-panel-title>{{ project.title }}</mat-panel-title>
-          </mat-expansion-panel-header>
-
-          <div class="project-wrapper">
-
-            <!-- Code Column -->
-            <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
-              <div class="code-wrapper">
-                <div *ngIf="project.loaded_file; else loadingDs">
-                  <div [innerHTML]="project.loaded_file.content"></div>
+                  <ng-template #loadingDs>
+                    <p class="loading-message">Loading code...</p>
+                  </ng-template>
                 </div>
-                <ng-template #loadingDs>
-                  <p class="loading-message">Loading code...</p>
+              </div>
+
+              <div class="image-column" *ngIf="project.safe_image_url">
+                <ng-container *ngIf="isPdf(project.image); else imageViewDs">
+                  <ng-container *ngIf="!isMobile(); else mobilePdfDs">
+                    <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
+                      <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
+                    </object>
+                  </ng-container>
+                  <ng-template #mobilePdfDs>
+                    <div class="mobile-pdf-message">
+                      <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+                    </div>
+                  </ng-template>
+                </ng-container>
+                <ng-template #imageViewDs>
+                  <img [src]="project.safe_image_url" alt="Project image" />
                 </ng-template>
               </div>
             </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </mat-tab>
+    </mat-tab-group>
 
-            <!-- Image / PDF Column -->
-            <div class="image-column" *ngIf="project.safe_image_url">
-              <ng-container *ngIf="isPdf(project.image); else imageViewDs">
-                <ng-container *ngIf="!isMobile(); else mobilePdfDs">
-                  <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
-                    <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
-                  </object>
-                </ng-container>
-                <ng-template #mobilePdfDs>
-                  <div class="mobile-pdf-message">
-                    <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
-                  </div>
-                </ng-template>
-              </ng-container>
-              <ng-template #imageViewDs>
-                <img [src]="project.safe_image_url" alt="Project image" />
-              </ng-template>
-            </div>
-
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </mat-tab>
-  </mat-tab-group>
+  </div>
 </div>
