@@ -58,23 +58,29 @@
 
       <mat-tab label="Data Science Projects">
         <mat-accordion multi="false">
-          <mat-expansion-panel *ngFor="let project of dsProjects">
+          <mat-expansion-panel
+            *ngFor="let project of dsProjects; let i = index"
+            (opened)="onPanelOpened(i)">
+            
             <mat-expansion-panel-header>
               <mat-panel-title>{{ project.title }}</mat-panel-title>
             </mat-expansion-panel-header>
-
+      
             <div class="project-wrapper">
+      
+              <!-- Code Column (lazy JupyterLite iframe with caching) -->
               <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
                 <div class="code-wrapper">
-                  <div *ngIf="project.loaded_file; else loadingDs">
-                    <div [innerHTML]="project.loaded_file.content"></div>
-                  </div>
-                  <ng-template #loadingDs>
-                    <p class="loading-message">Loading code...</p>
+                  <ng-container *ngIf="openedDsPanels.has(i); else loadingMessage">
+                    <div [innerHTML]="project.loaded_file?.content"></div>
+                  </ng-container>
+                  <ng-template #loadingMessage>
+                    <p class="loading-message">Notebook will load when panel is opened.</p>
                   </ng-template>
                 </div>
               </div>
-
+      
+              <!-- Image or PDF Preview -->
               <div class="image-column" *ngIf="project.safe_image_url">
                 <ng-container *ngIf="isPdf(project.image); else imageViewDs">
                   <ng-container *ngIf="!isMobile(); else mobilePdfDs">
@@ -92,10 +98,12 @@
                   <img [src]="project.safe_image_url" alt="Project image" />
                 </ng-template>
               </div>
+      
             </div>
           </mat-expansion-panel>
         </mat-accordion>
       </mat-tab>
+      
     </mat-tab-group>
 
   </div>

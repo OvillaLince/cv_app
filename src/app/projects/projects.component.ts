@@ -30,7 +30,8 @@ export class ProjectsComponent implements OnInit {
   retryCount = 0;
   MAX_RETRIES = 3;
   RETRY_DELAY_MS = 3000;
-
+  openedDsPanels = new Set<number>();
+  
   constructor(private http: HttpClient, private sanitizer: DomSanitizer,private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
@@ -179,5 +180,8 @@ export class ProjectsComponent implements OnInit {
   }
   refresh(){
     this.loadProjects();
+  }
+  onPanelOpened(index: number): void {
+    this.openedDsPanels.add(index);
   }
 }
