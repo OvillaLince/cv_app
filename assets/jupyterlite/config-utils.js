@@ -26,7 +26,6 @@ const LITE_ROOT_ATTR = 'jupyterLiteRoot';
  */
 const LITE_FILES = ['jupyter-lite.json', 'jupyter-lite.ipynb'];
 
-const canonicalHref = document.querySelector("link[rel=canonical]").href;
 /**
  * And this link tag, used like so to load a bundle after configuration.
  *
