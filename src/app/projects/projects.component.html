@@ -1,5 +1,4 @@
 <div class="mdl-grid projects-container">
-
   <div class="mdl-cell mdl-cell--12-col mdl-cell--8-col-tablet mdl-cell--4-col-phone">
 
     <!-- Back button and title -->
@@ -7,12 +6,12 @@
       <button mat-button class="back-button" routerLink="/home">
         <mat-icon>chevron_left</mat-icon>
       </button>
-
       <h1 class="page-title">My Projects</h1>
     </div>
-    <mat-tab-group (selectedTabChange)="onTabChange($event)" mat-stretch-tabs dynamicHeight>
-      <mat-tab label="Database Projects">
 
+    <mat-tab-group (selectedTabChange)="onTabChange($event)" mat-stretch-tabs dynamicHeight>
+      <!-- DB Projects Tab -->
+      <mat-tab label="Database Projects">
         <ng-container *ngIf="isLoadingDB; else dbContent">
           <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
           <div class="tab-loading-message">
@@ -62,6 +61,7 @@
         </ng-template>
       </mat-tab>
 
+      <!-- DS Projects Tab -->
       <mat-tab label="Data Science Projects">
         <ng-container *ngIf="isLoadingDS; else dsContent">
           <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
@@ -69,32 +69,39 @@
             <p>Loading Data Science Projects...</p>
           </div>
         </ng-container>
-        
+
         <ng-template #dsContent>
           <mat-accordion multi="false" *ngIf="dsProjects.length > 0">
-            <mat-expansion-panel
-              *ngFor="let project of dsProjects; let i = index"
-              (opened)="onPanelOpened(i)">
-              
+            <mat-expansion-panel *ngFor="let project of dsProjects; let i = index" (opened)="onPanelOpened(i)">
               <mat-expansion-panel-header>
                 <mat-panel-title>{{ project.title }}</mat-panel-title>
               </mat-expansion-panel-header>
-        
+
               <div class="project-wrapper">
-        
-                <!-- Code Column (lazy JupyterLite iframe with caching) -->
-                <div class="code-column" *ngIf="project.codeFile !== 'NULL'">
+                <!-- Code Column with inline JupyterLite viewer -->
+                <div class="code-column" *ngIf="project.codeFile.endsWith('.ipynb')">
                   <div class="code-wrapper">
-                    <ng-container *ngIf="openedDsPanels.has(i); else loadingMessage">
-                      <div [innerHTML]="project.loaded_file?.content"></div>
-                    </ng-container>
-                    <ng-template #loadingMessage>
-                      <p class="loading-message">Notebook will load when panel is opened.</p>
-                    </ng-template>
+                    <button mat-raised-button color="primary" (click)="openNotebook(project.codeFile, project)">
+                      📓 Open Notebook
+                    </button>
+
+                    <div *ngIf="activeNotebook === project.codeFile" class="iframe-wrapper">
+                      <div class="notebook-header">
+                        <button mat-button color="warn" (click)="closeNotebook()">Close</button>
+                        <span class="notebook-title">{{ getFilename(project.codeFile) }}</span>
+                      </div>
+                      <iframe
+                        [src]="trustedNotebookUrl"
+                        width="100%"
+                        height="600px"
+                        frameborder="0"
+                        style="margin-top: 0.5rem;">
+                      </iframe>
+                    </div>
                   </div>
                 </div>
-        
-                <!-- Image or PDF Preview -->
+
+                <!-- Image or PDF -->
                 <div class="image-column" *ngIf="project.safe_image_url">
                   <ng-container *ngIf="isPdf(project.image); else imageViewDs">
                     <ng-container *ngIf="!isMobile(); else mobilePdfDs">
@@ -112,14 +119,11 @@
                     <img [src]="project.safe_image_url" alt="Project image" />
                   </ng-template>
                 </div>
-        
               </div>
             </mat-expansion-panel>
           </mat-accordion>
         </ng-template>
-        
       </mat-tab>
-      
     </mat-tab-group>
 
   </div>

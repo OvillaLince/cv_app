@@ -17,11 +17,6 @@ interface Project {
   loaded_file: CodeFile | null;
 }
 
-interface AllProjectsResponse {
-  dbProject: Project[];
-  dsProject: Project[];
-}
-
 @Component({
   selector: 'app-projects',
   standalone: false,
@@ -34,11 +29,12 @@ export class ProjectsComponent implements OnInit {
   isLoadingDB = false;
   isLoadingDS = false;
   selectedTabIndex = 0;
-
- 
   openedDsPanels = new Set<number>();
-  
-  constructor(private http: HttpClient, private sanitizer: DomSanitizer,private snackBar: MatSnackBar) {}
+
+  activeNotebook: string | null = null;
+  trustedNotebookUrl: SafeResourceUrl | null = null;
+
+  constructor(private http: HttpClient, private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
     this.loadDbProjects();
@@ -49,8 +45,8 @@ export class ProjectsComponent implements OnInit {
     this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db')
       .subscribe({
         next: (response) => {
-          this.dbProjects = response;  
-          this.loadProjectFiles(this.dbProjects);  
+          this.dbProjects = response;
+          this.loadProjectFiles(this.dbProjects);
           this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
@@ -62,13 +58,14 @@ export class ProjectsComponent implements OnInit {
         }
       });
   }
+
   loadDsProjects(): void {
     this.isLoadingDS = true;
     this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/project/ds')
       .subscribe({
         next: (response) => {
-          this.dsProjects = response;  
-          this.loadProjectFiles(this.dsProjects);  
+          this.dsProjects = response;
+          this.loadProjectFiles(this.dsProjects);
           this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
@@ -80,44 +77,25 @@ export class ProjectsComponent implements OnInit {
         }
       });
   }
+
   onTabChange(event: MatTabChangeEvent): void {
     this.selectedTabIndex = event.index;
-  
     if (event.index === 0 && this.dbProjects.length === 0) {
       this.loadDbProjects();
     } else if (event.index === 1 && this.dsProjects.length === 0) {
       this.loadDsProjects();
     }
   }
+
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
       const path = project.codeFile;
 
-      // ✅ Trust image/pdf path
-      if (project.image != 'NULL') {
+      if (project.image !== 'NULL') {
         project.safe_image_url = this.sanitizer.bypassSecurityTrustResourceUrl(project.image);
       }
 
-      // ✅ Use Binder link for .ipynb files
-      if (path != 'NULL' && path.endsWith('.ipynb')) {
-        const filename = this.getFilename(path);
-        const jliteurl = `https://ovillalince.github.io/cv_app/assets/jupyterlite/index.html?path=files/${filename}`;
-        const fileHTML = `
-          <iframe
-            src="${jliteurl}"
-            width="100%"
-            height="600px"
-            frameborder="0">
-          </iframe>
-        `;
-        project.loaded_file = {
-          name: filename,
-          content: this.sanitizer.bypassSecurityTrustHtml(fileHTML)
-        };
-      }
-
-      // ✅ Handle .sql or .txt files
-      else if (path != 'NULL' && path.endsWith('.sql') || path.endsWith('.txt')) {
+      if (path !== 'NULL' && (path.endsWith('.sql') || path.endsWith('.txt'))) {
         this.http.get(path, { responseType: 'text' }).subscribe({
           next: content => {
             project.loaded_file = {
@@ -131,6 +109,18 @@ export class ProjectsComponent implements OnInit {
         });
       }
     }
+  }
+
+  openNotebook(path: string, project: Project): void {
+    const filename = this.getFilename(path);
+    this.activeNotebook = path;  // key change here
+    const jliteurl = `https://ovillalince.github.io/cv_app/assets/jupyterlite/index.html?url=files/${filename}`;
+    this.trustedNotebookUrl = this.sanitizer.bypassSecurityTrustResourceUrl(jliteurl);
+  }
+
+  closeNotebook(): void {
+    this.activeNotebook = null;
+    this.trustedNotebookUrl = null;
   }
 
   escapeHtml(text: string): string {
@@ -147,12 +137,15 @@ export class ProjectsComponent implements OnInit {
   getFilename(path: string): string {
     return path.split('/').pop() || '';
   }
+
   public isPdf(path: string | null | undefined): boolean {
     return !!path && path.trim().toLowerCase().endsWith('.pdf');
   }
+
   isMobile(): boolean {
     return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   }
+
   onPanelOpened(index: number): void {
     this.openedDsPanels.add(index);
   }
