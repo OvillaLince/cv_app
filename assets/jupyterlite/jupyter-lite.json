@@ -1,14 +1,9 @@
 {
-  "apps": [
-    "lab"
-  ],
-  "contents": "content",
   "jupyter-config-data": {
     "appName": "JupyterLite",
     "appUrl": "./lab",
     "appVersion": "0.5.1",
     "baseUrl": "./",
-    "contents": "content",
     "defaultKernelName": "python",
     "faviconUrl": "./lab/favicon.ico",
     "federated_extensions": [],
