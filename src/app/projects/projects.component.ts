@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabChangeEvent } from '@angular/material/tabs';
+import { MyApiService } from '../services/my-api.service';
 
 interface CodeFile {
   name: string;
@@ -30,6 +31,7 @@ export class ProjectsComponent implements OnInit {
   isLoadingDS = false;
   selectedTabIndex = 0;
   openedDsPanels = new Set<number>();
+  api='https://37a4d94fef26.ngrok-free.app'
 
   activeNotebook: string | null = null;
   trustedNotebookUrl: SafeResourceUrl | null = null;
@@ -42,15 +44,15 @@ export class ProjectsComponent implements OnInit {
 
   loadDbProjects(): void {
     this.isLoadingDB = true;
-    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/projects/db')
+    this.http.get<Project[]>( this.api +'/api/projects/db')
       .subscribe({
         next: (response) => {
           this.dbProjects = response;
           this.loadProjectFiles(this.dbProjects);
-          this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
+          this.snackBar.open('Database projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
-          console.error('All projects error:', err);
+          console.error('Database projects loading error:', err);
           this.loadDbProjects();
         },
         complete: () => {
@@ -61,15 +63,15 @@ export class ProjectsComponent implements OnInit {
 
   loadDsProjects(): void {
     this.isLoadingDS = true;
-    this.http.get<Project[]>('https://cv-app-backend.onrender.com/api/project/ds')
+    this.http.get<Project[]>( this.api + '/api/project/ds')
       .subscribe({
         next: (response) => {
           this.dsProjects = response;
           this.loadProjectFiles(this.dsProjects);
-          this.snackBar.open('All projects loaded successfully ✅', 'Close', { duration: 2500 });
+          this.snackBar.open('Data Science projects loading successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
-          console.error('All projects error:', err);
+          console.error('Data Science projects loading error:', err);
           this.loadDsProjects();
         },
         complete: () => {

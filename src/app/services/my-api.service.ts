@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class MyApiService {
-  private apiUrl = 'https://localhost:5001/api'; // Use your actual endpoint
+  private apiUrl = 'https://37a4d94fef26.ngrok-free.app';
 
   constructor(private http: HttpClient) {}
 
