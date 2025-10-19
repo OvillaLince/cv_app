@@ -31,7 +31,7 @@ export class ProjectsComponent implements OnInit {
   isLoadingDS = false;
   selectedTabIndex = 0;
   openedDsPanels = new Set<number>();
-  api='https://37a4d94fef26.ngrok-free.app'
+  api='https://87179ceea058.ngrok-free.app'
 
   activeNotebook: string | null = null;
   trustedNotebookUrl: SafeResourceUrl | null = null;
