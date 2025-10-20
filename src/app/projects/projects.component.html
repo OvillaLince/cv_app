@@ -73,53 +73,56 @@
         <ng-template #dsContent>
           <mat-accordion multi="false" *ngIf="dsProjects.length > 0">
             <mat-expansion-panel *ngFor="let project of dsProjects; let i = index" (opened)="onPanelOpened(i)">
-              <mat-expansion-panel-header>
-                <mat-panel-title>{{ project.title }}</mat-panel-title>
-              </mat-expansion-panel-header>
+              <ng-container *ngIf="project.image != 'NULL' ">
+                <mat-expansion-panel-header >
+                  <mat-panel-title>{{ project.title }}</mat-panel-title>
+                </mat-expansion-panel-header>
 
-              <div class="project-wrapper">
-                <!-- Code Column with inline JupyterLite viewer -->
-                <div class="code-column" *ngIf="project.codeFile.endsWith('.ipynb')">
-                  <div class="code-wrapper">
-                    <button mat-raised-button color="primary" (click)="openNotebook(project.codeFile, project)">
-                      📓 Open Notebook
-                    </button>
+                <div class="project-wrapper">
+                  <!-- Code Column with inline JupyterLite viewer -->
+                  <div class="code-column" *ngIf="project.codeFile.endsWith('.ipynb')">
+                    <div class="code-wrapper">
+                      <button mat-raised-button color="primary" (click)="openNotebook(project.codeFile, project)">
+                        📓 Open Notebook
+                      </button>
 
-                    <div *ngIf="activeNotebook === project.codeFile" class="iframe-wrapper">
-                      <div class="notebook-header">
-                        <button mat-button color="warn" (click)="closeNotebook()">Close</button>
-                        <span class="notebook-title">{{ getFilename(project.codeFile) }}</span>
+                      <div *ngIf="activeNotebook === project.codeFile" class="iframe-wrapper">
+                        <div class="notebook-header">
+                          <button mat-button color="warn" (click)="closeNotebook()">Close</button>
+                          <span class="notebook-title">{{ getFilename(project.codeFile) }}</span>
+                        </div>
+                        <iframe
+                          [src]="trustedNotebookUrl"
+                          width="100%"
+                          height="600px"
+                          frameborder="0"
+                          style="margin-top: 0.5rem;">
+                        </iframe>
                       </div>
-                      <iframe
-                        [src]="trustedNotebookUrl"
-                        width="100%"
-                        height="600px"
-                        frameborder="0"
-                        style="margin-top: 0.5rem;">
-                      </iframe>
                     </div>
                   </div>
-                </div>
 
-                <!-- Image or PDF -->
-                <div class="image-column" *ngIf="project.safe_image_url">
-                  <ng-container *ngIf="isPdf(project.image); else imageViewDs">
-                    <ng-container *ngIf="!isMobile(); else mobilePdfDs">
-                      <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
-                        <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
-                      </object>
+                  <!-- Image or PDF -->
+                  <div class="image-column" *ngIf="project.safe_image_url">
+                    <ng-container *ngIf="isPdf(project.image); else imageViewDs">
+                      <ng-container *ngIf="!isMobile(); else mobilePdfDs">
+                        <object [data]="project.safe_image_url" type="application/pdf" width="100%" height="500px">
+                          <p>PDF preview not available. <a [href]="project.image" target="_blank">Download PDF</a></p>
+                        </object>
+                      </ng-container>
+                      <ng-template #mobilePdfDs>
+                        <div class="mobile-pdf-message">
+                          <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
+                        </div>
+                      </ng-template>
                     </ng-container>
-                    <ng-template #mobilePdfDs>
-                      <div class="mobile-pdf-message">
-                        <p>This PDF cannot be previewed on mobile. <a [href]="project.image" target="_blank">Open or Download PDF</a></p>
-                      </div>
+                    <ng-template #imageViewDs>
+                      <img [src]="project.safe_image_url" alt="Project image" />
                     </ng-template>
-                  </ng-container>
-                  <ng-template #imageViewDs>
-                    <img [src]="project.safe_image_url" alt="Project image" />
-                  </ng-template>
+                  </div>
                 </div>
-              </div>
+              </ng-container>
+              
             </mat-expansion-panel>
           </mat-accordion>
         </ng-template>

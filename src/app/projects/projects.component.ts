@@ -68,7 +68,7 @@ export class ProjectsComponent implements OnInit {
         next: (response) => {
           this.dsProjects = response;
           this.loadProjectFiles(this.dsProjects);
-          this.snackBar.open('Data Science projects loading successfully ✅', 'Close', { duration: 2500 });
+          this.snackBar.open('Data Science projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
           console.error('Data Science projects loading error:', err);

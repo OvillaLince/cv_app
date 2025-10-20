@@ -1,6 +1,7 @@
 {
   "name": "my-angular-app",
   "version": "0.0.0",
+  "homepage": "https://ovillalince.github.io/cv_app/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
