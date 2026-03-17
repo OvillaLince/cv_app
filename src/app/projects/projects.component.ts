@@ -12,9 +12,9 @@ interface CodeFile {
 
 interface Project {
   title: string;
-  image: string;
+  image?: string | null;
   safe_image_url?: SafeResourceUrl;
-  codeFile: string;
+  codeFile?: string | null;
   loaded_file: CodeFile | null;
 }
 
@@ -25,13 +25,117 @@ interface Project {
   styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
-  dbProjects: Project[] = [];
-  dsProjects: Project[] = [];
+dbProjects: Project[] = [
+
+  {
+    title: 'Exam 1 – Advanced Databases',
+    image: null,
+    codeFile: 'assets/Exam1-AdvDBs.sql',
+    loaded_file: null
+  },
+  {
+    title: 'Project 1 – Advanced Databases',
+    image: null,
+    codeFile: 'assets/Project1-AdvDBs.txt',
+    loaded_file: null
+  },
+  {
+    title: 'Project 1 – Graph Databases',
+    image: 'assets/Project1-GraphDbs.pdf',
+    codeFile: null,
+    loaded_file: null
+  },
+  {
+    title: 'Project 2 – Graph Databases',
+    image: 'assets/Project2-GraphDbs.pdf',
+    codeFile: 'assets/Project2-GraphDbs.txt',
+    loaded_file: null
+  },
+  {
+    title: 'Project 3 – Graph Databases',
+    image: 'assets/Project3-GraphDbs.pdf',
+    codeFile: null,
+    loaded_file: null
+  },
+  {
+    title: 'Project 4 – Graph Databases',
+    image: 'assets/Project4-GraphDbs.pdf',
+    codeFile: null,
+    loaded_file: null
+  }
+
+];
+ dsProjects: Project[] = [
+
+  // ===== PROJECT 1 =====
+
+  {
+    title: 'Project 1 – Data Mining Linear Models',
+    image: 'assets/Project1-DataMiningLinearM.pdf',
+    codeFile: 'assets/Project1-DataMiningLinearM.ipynb',
+    loaded_file: null
+  },
+  {
+    title: 'Project 1 – Data Visualization',
+    image: null,
+    codeFile: 'assets/Project1-DataVisualization.ipynb',
+    loaded_file: null
+  },
+
+  // ===== PROJECT 2 =====
+
+  {
+    title: 'Project 2 – Data Mining',
+    image: 'assets/Project2-DataMining.pdf',
+    codeFile: 'assets/Project2-DataMining.ipynb',
+    loaded_file: null
+  },
+  {
+    title: 'Project 2 – Data Mining Linear Models',
+    image: 'assets/Project2-DataMiningLinearM.pdf',
+    codeFile: 'assets/Project2-DataMiningLinearM.ipynb',
+    loaded_file: null
+  },
+  {
+    title: 'Project 2 – Web Mining',
+    image: 'assets/Project2-WebMining.pdf',
+    codeFile: 'assets/Project2-WebMining.ipynb',
+    loaded_file: null
+  },
+
+  // ===== PROJECT 3 =====
+
+  {
+    title: 'Project 3 – Data Mining',
+    image: 'assets/Project3-DataMining.pdf',
+    codeFile: 'assets/Project3-DataMining.ipynb',
+    loaded_file: null
+  },
+  {
+    title: 'Project 3 – Data Mining Linear Models',
+    image: 'assets/Project3-DataMiningLinearM.pdf',
+    codeFile: 'assets/Project3-DataMiningLinearM.ipynb',
+    loaded_file: null
+  },
+  {
+    title: 'Project 3 – Data Visualization',
+    image: null,
+    codeFile: 'assets/Project3-DataVisualization.ipynb',
+    loaded_file: null
+  },
+  {
+    title: 'Project 3 – Web Mining',
+    image: 'assets/Project3-WebMining.pdf',
+    codeFile: 'assets/Project3-WebMining.ipynb',
+    loaded_file: null
+  }
+
+];
   isLoadingDB = false;
   isLoadingDS = false;
   selectedTabIndex = 0;
   openedDsPanels = new Set<number>();
-  api='https://87179ceea058.ngrok-free.app'
+  //api='https://87179ceea058.ngrok-free.app'
 
   activeNotebook: string | null = null;
   trustedNotebookUrl: SafeResourceUrl | null = null;
@@ -39,16 +143,17 @@ export class ProjectsComponent implements OnInit {
   constructor(private http: HttpClient, private sanitizer: DomSanitizer, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
-    this.loadDbProjects();
+    this.loadProjectFiles(this.dbProjects);
+    this.loadProjectFiles(this.dsProjects);
   }
 
-  loadDbProjects(): void {
+ /*loadDbProjects(): void {
     this.isLoadingDB = true;
     this.http.get<Project[]>( this.api +'/api/projects/db')
       .subscribe({
         next: (response) => {
           this.dbProjects = response;
-          this.loadProjectFiles(this.dbProjects);
+          
           this.snackBar.open('Database projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
@@ -59,15 +164,14 @@ export class ProjectsComponent implements OnInit {
           this.isLoadingDB = false;
         }
       });
-  }
+  }*/
 
-  loadDsProjects(): void {
+  /*loadDsProjects(): void {
     this.isLoadingDS = true;
     this.http.get<Project[]>( this.api + '/api/project/ds')
       .subscribe({
         next: (response) => {
           this.dsProjects = response;
-          this.loadProjectFiles(this.dsProjects);
           this.snackBar.open('Data Science projects loaded successfully ✅', 'Close', { duration: 2500 });
         },
         error: (err) => {
@@ -78,16 +182,7 @@ export class ProjectsComponent implements OnInit {
           this.isLoadingDS = false;
         }
       });
-  }
-
-  onTabChange(event: MatTabChangeEvent): void {
-    this.selectedTabIndex = event.index;
-    if (event.index === 0 && this.dbProjects.length === 0) {
-      this.loadDbProjects();
-    } else if (event.index === 1 && this.dsProjects.length === 0) {
-      this.loadDsProjects();
-    }
-  }
+  }*/
 
   loadProjectFiles(projects: Project[]) {
     for (const project of projects) {
